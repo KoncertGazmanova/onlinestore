@@ -1,0 +1,75 @@
+<!-- store/templates/store/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Интернет-магазин - Главная</title>
+    <!-- Подключаем Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <!-- Пример всплывающего окна для выбора города (упрощённо) -->
+    <script>
+      // Если cookies не установлены, можно вывести окно выбора города
+    </script>
+
+    <h1>Список товаров</h1>
+    <!-- Форма для поиска и сортировки товаров -->
+    <form method="get" action="">
+         <input type="text" name="search" placeholder="Поиск товаров" />
+         <select name="sort">
+              <option value="">Сортировка</option>
+              <option value="price_asc">Цена по возрастанию</option>
+              <option value="price_desc">Цена по убыванию</option>
+         </select>
+         <button type="submit">Применить</button>
+    </form>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4" style="margin-top:20px;">
+            <div class="card">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p>Цена: {{ product.price }}</p>
+                    <!-- Кнопка добавления товара в корзину -->
+                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Добавить в корзину</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Счетчик товаров в корзине -->
+    <div>
+         <a href="{% url 'cart' %}">Корзина (<span id="cart-count">0</span>)</a>
+    </div>
+</div>
+
+<!-- Подключаем jQuery для AJAX-запросов -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    // Обработчик клика по кнопке "Добавить в корзину"
+    $('.add-to-cart').click(function(){
+         var prod_id = $(this).data('product-id');
+         $.ajax({
+              url: "{% url 'add_to_cart' %}",
+              method: "POST",
+              data: {
+                   product_id: prod_id,
+                   csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function(data){
+                   if(data.status == 'ok'){
+                        $('#cart-count').text(data.cart_count);
+                   }
+              }
+         });
+    });
+</script>
+</body>
+</html>
